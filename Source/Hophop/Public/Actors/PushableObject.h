@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class UBoxComponent;
+class UPromptComponent;
 
 UCLASS()
 class HOPHOP_API APushableObject : public AActor, public IInteractableInterface
@@ -31,12 +32,23 @@ protected:
 
 	virtual void BeginPlay() override;
 
-private:
+	UFUNCTION()
+		void OnWidgetBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	UFUNCTION()
+		void OnWidgetBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(VisibleAnywhere, Category = Initialization)
 		UStaticMeshComponent* Mesh;
 	UPROPERTY(VisibleAnywhere, Category = Initialization)
 		UBoxComponent* Box;
+	UPROPERTY(VisibleAnywhere, Category = Initialization)
+		UBoxComponent* WidgetCollision;
+	UPROPERTY(VisibleAnywhere, Category = Initialization)
+		UPromptComponent* PromptDisplay;
+
+private:
+
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		FVector Direction;
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))

@@ -50,6 +50,8 @@ private:
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* MoveAction;
 	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* RunAction;
+	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* LookAction;
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* JumpAction;
@@ -59,6 +61,9 @@ private:
 		UInputAction* AttackAction;
 
 	void Move(const FInputActionValue& Value);
+	void Run(const FInputActionValue& Value);
+	void CancelRun(const FInputActionValue& Value);
+	void ChargeJump(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
@@ -66,4 +71,13 @@ private:
 	// ----------Variable----------
 	UPROPERTY(EditAnywhere, Category = Input)
 		TSubclassOf<ACarrotProjectile> CarrotProjectile;
+
+		// Player Movement
+
+	float WalkSpeed;
+	UPROPERTY(EditAnywhere, Category = Initialization)
+	float JumpMultiplier = 1.f;
+	float OriginalJumpHeight;
+	float PresentJumpHeight;
+	float MaxJumpHeight;
 };

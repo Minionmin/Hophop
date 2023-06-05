@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "Components/BoxComponent.h"
+#include "HUD/PromptComponent.h"
 
 APushableObject::APushableObject()
 {
@@ -18,9 +19,24 @@ APushableObject::APushableObject()
 	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap);
 	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel1, ECollisionResponse::ECR_Block);
+	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel2, ECollisionResponse::ECR_Block);
+	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Block);
 	SetRootComponent(Box);
 
+	WidgetCollision = CreateDefaultSubobject<UBoxComponent>("WidgetCollision");
+	WidgetCollision->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
+	WidgetCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	WidgetCollision->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	WidgetCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Overlap);
+	WidgetCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Overlap);
+	WidgetCollision->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
+	WidgetCollision->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
+	WidgetCollision->SetupAttachment(GetRootComponent());
+
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Mesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
 	Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Block);
@@ -28,19 +44,33 @@ APushableObject::APushableObject()
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	Mesh->SetupAttachment(GetRootComponent());
 
-
-}
-
-void APushableObject::BeginPlay()
-{
-	Super::BeginPlay();
-	
+	PromptDisplay = CreateDefaultSubobject<UPromptComponent>("PromptDisplay");
+	PromptDisplay->SetupAttachment(GetRootComponent());
+	PromptDisplay->SetVisibility(false);
 }
 
 void APushableObject::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void APushableObject::BeginPlay()
+{
+	Super::BeginPlay();
+
+	WidgetCollision->OnComponentBeginOverlap.AddDynamic(this, &APushableObject::OnWidgetBoxOverlap);
+	WidgetCollision->OnComponentEndOverlap.AddDynamic(this, &APushableObject::OnWidgetBoxEndOverlap);
+}
+
+void APushableObject::OnWidgetBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	PromptDisplay->SetVisibility(true);
+}
+
+void APushableObject::OnWidgetBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	PromptDisplay->SetVisibility(false);
 }
 
 void APushableObject::IsInteracted_Implementation(ACharacter* InCharacter)

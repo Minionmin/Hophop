@@ -23,6 +23,8 @@ public:
 		class ARabbit* Rabbit;
 	UPROPERTY(BlueprintReadOnly, Category = Initialization)
 		class UCharacterMovementComponent* RabbitMovement;
-	UPROPERTY(BlueprintReadOnly, Category = Initialization)
-		float GroudSpeed;
+	UPROPERTY(BlueprintReadOnly, Category = State)
+		float GroundSpeed;
+	UPROPERTY(BlueprintReadOnly, Category = State)
+		bool IsFalling;
 };

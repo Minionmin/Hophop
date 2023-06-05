@@ -22,6 +22,8 @@ ARabbit::ARabbit()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	Boomstick = CreateDefaultSubobject<USpringArmComponent>(TEXT("Boomstick"));
 	Boomstick->SetupAttachment(GetRootComponent());
 
@@ -37,6 +39,10 @@ void ARabbit::BeginPlay()
 	Super::BeginPlay();
 	
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	WalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+	OriginalJumpHeight = GetCharacterMovement()->JumpZVelocity;
+	PresentJumpHeight = OriginalJumpHeight;
+	MaxJumpHeight = GetCharacterMovement()->JumpZVelocity * JumpMultiplier;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -61,17 +67,30 @@ void ARabbit::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARabbit::Move);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Triggered, this, &ARabbit::Run);
+		EnhancedInputComponent->BindAction(RunAction, ETriggerEvent::Completed, this, &ARabbit::CancelRun);
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARabbit::Look);
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARabbit::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ARabbit::ChargeJump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ARabbit::Jump);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ARabbit::Interact);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ARabbit::Attack);
 	}
 
 }
 
+void ARabbit::ChargeJump(const FInputActionValue& Value)
+{
+	if (PresentJumpHeight < MaxJumpHeight)
+	{
+		PresentJumpHeight += 5;
+	}
+}
+
 void ARabbit::Jump()
 {
+	GetCharacterMovement()->JumpZVelocity = PresentJumpHeight;
 	Super::Jump();
+	PresentJumpHeight = OriginalJumpHeight;
 }
 
 void ARabbit::Move(const FInputActionValue& Value)
@@ -84,6 +103,16 @@ void ARabbit::Move(const FInputActionValue& Value)
 	AddMovementInput(ForwardDirection, MovementVector.X);
 	const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 	AddMovementInput(RightDirection, MovementVector.Y);
+}
+
+void ARabbit::Run(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed * 2;
+}
+
+void ARabbit::CancelRun(const FInputActionValue& Value)
+{
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ARabbit::Look(const FInputActionValue& Value)
@@ -134,7 +163,7 @@ void ARabbit::Interact(const FInputActionValue& Value)
 
 void ARabbit::Attack(const FInputActionValue& Value)
 {
-	GetWorld()->SpawnActor<ACarrotProjectile>(CarrotProjectile, GetActorLocation() + GetActorForwardVector() * 50.f, GetActorRotation());
+	GetWorld()->SpawnActor<ACarrotProjectile>(CarrotProjectile, GetActorLocation() + GetActorForwardVector() * 50.f + FVector(0.f, 0.f, 30.f), GetActorRotation());
 }
 
 

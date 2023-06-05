@@ -24,6 +24,7 @@ void URabbitAnimInstance::NativeUpdateAnimation(float DeltaTime)
 
 	if (RabbitMovement)
 	{
-		GroudSpeed = UKismetMathLibrary::VSizeXY(RabbitMovement->Velocity);
+		GroundSpeed = UKismetMathLibrary::VSizeXY(RabbitMovement->Velocity);
+		IsFalling = RabbitMovement->IsFalling();
 	}
 }
