@@ -4,9 +4,15 @@
 #include "Actors/Teleporter.h"
 #include "Kismet/GameplayStatics.h"
 #include "HUD/PromptComponent.h"
+#include "NiagaraComponent.h"
 
 ATeleporter::ATeleporter()
 {
+	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	Portal = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Portal"));
+	Portal->SetupAttachment(GetRootComponent());
+
 }
 
 void ATeleporter::Tick(float DeltaTime)
@@ -17,14 +23,15 @@ void ATeleporter::Tick(float DeltaTime)
 void ATeleporter::BeginPlay()
 {
 	Super::BeginPlay();
-	PromptDisplay->SetTargetLevelText(TargetLevel);
+	PromptDisplay->SetVisibility(false);
+	PromptDisplay->SetTargetLevelText(getTargetLevelName());
 	
 }
 
 void ATeleporter::IsInteracted_Implementation(ACharacter* InCharacter)
 {
-	if (!TargetLevel.IsNone())
+	if (!getTargetLevelName().IsNone())
 	{
-		UGameplayStatics::OpenLevel(GetWorld(), TargetLevel);
+		UGameplayStatics::OpenLevel(GetWorld(), getTargetLevelName());
 	}
 }

@@ -30,6 +30,8 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "TargetLevel")
 		FName TargetLevel;
+	UPROPERTY(VisibleAnywhere)
+		class UNiagaraComponent* Portal;
 
 public:
 

@@ -14,6 +14,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class ACarrotProjectile;
+class URabbitUserWidget;
 
 UCLASS()
 class HOPHOP_API ARabbit : public ACharacter
@@ -27,6 +28,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void Jump() override;
+
+	void EnableUI();
+	void DisableUI();
+
+	bool ESCAlreadyPressed;
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+		class UGuideUIComponent* GuideUIComponent;
 
 protected:
 
@@ -59,6 +67,8 @@ private:
 		UInputAction* InteractAction;
 	UPROPERTY(EditAnywhere, Category = Input)
 		UInputAction* AttackAction;
+	UPROPERTY(EditAnywhere, Category = Input)
+		UInputAction* ESCAction;
 
 	void Move(const FInputActionValue& Value);
 	void Run(const FInputActionValue& Value);
@@ -67,13 +77,24 @@ private:
 	void Look(const FInputActionValue& Value);
 	void Interact(const FInputActionValue& Value);
 	void Attack(const FInputActionValue& Value);
+	void ESC(const FInputActionValue& Value);
 
 	// ----------Variable----------
-	UPROPERTY(EditAnywhere, Category = Input)
+	UPROPERTY(EditAnywhere, Category = Projectile)
 		TSubclassOf<ACarrotProjectile> CarrotProjectile;
+	UPROPERTY(EditAnywhere, Category = Input)
+		APlayerController* RabbitController;
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+		TSubclassOf<URabbitUserWidget> MainMenuWidget;
+	UPROPERTY(VisibleAnywhere, Category = UI)
+		class URabbitMainMenuWidget* MainMenuWidgetRef;
+	UPROPERTY(EditDefaultsOnly, Category = UI)
+		TSubclassOf<URabbitUserWidget> MainMenuButtonWidget;
+	UPROPERTY(VisibleAnywhere, Category = UI)
+		class URabbitMainMenuButtonWidget* MainMenuButtonWidgetRef;
 
-		// Player Movement
 
+	// -------------Player Movement--------------
 	float WalkSpeed;
 	UPROPERTY(EditAnywhere, Category = Initialization)
 	float JumpMultiplier = 1.f;

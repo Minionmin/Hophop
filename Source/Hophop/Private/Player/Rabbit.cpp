@@ -13,6 +13,10 @@
 #include "Components/InputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
+#include "HUD/RabbitMainMenuWidget.h"
+#include "HUD/RabbitMainMenuButtonWidget.h"
+#include "HUD/GuideUIComponent.h"
+#include "Components/TextBlock.h"
 
 ARabbit::ARabbit()
 {
@@ -30,6 +34,10 @@ ARabbit::ARabbit()
 	ViewCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(Boomstick);
 
+	GuideUIComponent = CreateDefaultSubobject<UGuideUIComponent>(TEXT("GuideUIComponent"));
+	GuideUIComponent->SetupAttachment(GetRootComponent());
+	GuideUIComponent->SetVisibility(false);
+
 	// Make sure player posses this pawn
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
 }
@@ -43,6 +51,7 @@ void ARabbit::BeginPlay()
 	OriginalJumpHeight = GetCharacterMovement()->JumpZVelocity;
 	PresentJumpHeight = OriginalJumpHeight;
 	MaxJumpHeight = GetCharacterMovement()->JumpZVelocity * JumpMultiplier;
+	ESCAlreadyPressed = false;
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
 	{
@@ -51,6 +60,10 @@ void ARabbit::BeginPlay()
 			Subsystem->AddMappingContext(RabbitContext, 0);
 		}
 	}
+
+	RabbitController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	MainMenuWidgetRef = CreateWidget<URabbitMainMenuWidget>(GetWorld(), MainMenuWidget);
+	MainMenuButtonWidgetRef = CreateWidget<URabbitMainMenuButtonWidget>(GetWorld(), MainMenuButtonWidget);
 
 }
 
@@ -74,6 +87,7 @@ void ARabbit::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ARabbit::Jump);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &ARabbit::Interact);
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &ARabbit::Attack);
+		EnhancedInputComponent->BindAction(ESCAction, ETriggerEvent::Triggered, this, &ARabbit::ESC);
 	}
 
 }
@@ -166,5 +180,39 @@ void ARabbit::Attack(const FInputActionValue& Value)
 	GetWorld()->SpawnActor<ACarrotProjectile>(CarrotProjectile, GetActorLocation() + GetActorForwardVector() * 50.f + FVector(0.f, 0.f, 30.f), GetActorRotation());
 }
 
+void ARabbit::EnableUI()
+{
+	RabbitController->SetInputMode(FInputModeGameAndUI());
+	MainMenuWidgetRef->AddToViewport();
+	MainMenuButtonWidgetRef->AddToViewport();
+	MainMenuButtonWidgetRef->StartResumeText();
+	RabbitController->SetShowMouseCursor(true);
+}
 
+void ARabbit::DisableUI()
+{
+	RabbitController->SetInputMode(FInputModeGameOnly());
+	MainMenuWidgetRef->RemoveFromParent();
+	MainMenuButtonWidgetRef->RemoveFromParent();
+	RabbitController->SetShowMouseCursor(false);
+}
 
+void ARabbit::ESC(const FInputActionValue& Value)
+{
+	ESCAlreadyPressed = !ESCAlreadyPressed;
+
+	if (MainMenuWidget && MainMenuButtonWidget)
+	{
+		if (MainMenuWidgetRef && MainMenuButtonWidgetRef)
+		{
+			if (ESCAlreadyPressed)
+			{
+				EnableUI();
+			}
+			else
+			{
+				DisableUI();
+			}
+		}
+	}
+}

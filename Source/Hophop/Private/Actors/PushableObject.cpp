@@ -7,6 +7,8 @@
 #include "GameFramework/Character.h"
 #include "Components/BoxComponent.h"
 #include "HUD/PromptComponent.h"
+#include "Math/BoxSphereBounds.h"
+#include "Player/Rabbit.h"
 
 APushableObject::APushableObject()
 {
@@ -55,12 +57,31 @@ void APushableObject::Tick(float DeltaTime)
 
 }
 
+void APushableObject::ShowInRangePlayerUI()
+{
+	if (WidgetCollision->IsOverlappingActor(Cast<AActor>(RabbitPlayer)))
+	{
+		PromptDisplay->SetVisibility(true);
+	}
+	else
+	{
+		PromptDisplay->SetVisibility(false);
+	}
+}
+
 void APushableObject::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (!RabbitPlayer)
+	{
+		RabbitPlayer = Cast<ARabbit>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetPawn());
+	}
+	PromptDisplay->SetVisibility(false);
 	WidgetCollision->OnComponentBeginOverlap.AddDynamic(this, &APushableObject::OnWidgetBoxOverlap);
 	WidgetCollision->OnComponentEndOverlap.AddDynamic(this, &APushableObject::OnWidgetBoxEndOverlap);
+
+
 }
 
 void APushableObject::OnWidgetBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -79,6 +100,9 @@ void APushableObject::IsInteracted_Implementation(ACharacter* InCharacter)
 
 void APushableObject::CalculateToGoDirection(ACharacter* InCharacter)
 {
+	// Get mesh(box) length * box(collision) scale size
+	Distance = Mesh->Bounds.BoxExtent.X * 2;
+
 	FVector Forward = GetActorForwardVector();
 	FVector CharacterLocation = InCharacter->GetActorLocation();
 

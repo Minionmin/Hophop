@@ -32,6 +32,9 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable)
+		void ShowInRangePlayerUI();
+
 	UFUNCTION()
 		void OnWidgetBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
@@ -42,16 +45,18 @@ protected:
 		UStaticMeshComponent* Mesh;
 	UPROPERTY(VisibleAnywhere, Category = Initialization)
 		UBoxComponent* Box;
-	UPROPERTY(VisibleAnywhere, Category = Initialization)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Initialization)
 		UBoxComponent* WidgetCollision;
 	UPROPERTY(VisibleAnywhere, Category = Initialization)
 		UPromptComponent* PromptDisplay;
+	UPROPERTY(VisibleAnywhere, Category = Initialization)
+		class ARabbit* RabbitPlayer;
 
 private:
 
 	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 		FVector Direction;
-	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere)
 		float Distance;
 
 };
