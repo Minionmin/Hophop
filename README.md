@@ -17,3 +17,5 @@
 <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
          「キャラクターモデル」と「アイテム」は開発者がBlenderを通じて作成しました。また、「Low Poly Style Deluxe 2: Tropical Environment」と「Low Poly Viking World」といったアセットはEpic Storeから入手し、レベルデザインの準備としてプロジェクトに追加されました。なお、このリポジトリにはまだビルドされていないUE5およびアセットファイルが含まれていることにご注意ください。ただし、UE5エディタ内で直接ゲームにアクセスしてプレイすることはできます。
+
+<br>Gameplay・ゲームプレイ動画: https://drive.google.com/drive/u/1/folders/1HKVH6jJ7PKvShrs1R_k9dDU2_4daLlw_
