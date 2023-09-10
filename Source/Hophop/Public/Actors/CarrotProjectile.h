@@ -7,6 +7,8 @@
 #include "CarrotProjectile.generated.h"
 
 class UStaticMeshComponent;
+class UProjectileMovementComponent;
+class UCapsuleComponent;
 
 UCLASS()
 class HOPHOP_API ACarrotProjectile : public AActor
@@ -28,9 +30,9 @@ public:
 		UStaticMeshComponent* Mesh;
 
 	UPROPERTY(VisibleAnywhere, Category = Initialization)
-		class UProjectileMovementComponent* ProjectileMovement;
+		UProjectileMovementComponent* ProjectileMovement;
 
 	UPROPERTY(VisibleAnywhere, Category = Initialization)
-		class UCapsuleComponent* Capsule;
+		UCapsuleComponent* Capsule;
 
 };

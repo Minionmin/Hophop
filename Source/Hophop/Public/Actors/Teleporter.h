@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class HOPHOP_API ATeleporter : public APushableObject
+class HOPHOP_API ATeleporter : public AInteractableObject
 {
 	GENERATED_BODY()
 	

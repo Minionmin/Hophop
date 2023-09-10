@@ -2,17 +2,13 @@
 
 #pragma once
 
-#include "Interfaces/InteractableInterface.h"
+#include "Actors/InteractableObject.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "PushableObject.generated.h"
 
-class UStaticMeshComponent;
-class UBoxComponent;
-class UPromptComponent;
-
 UCLASS()
-class HOPHOP_API APushableObject : public AActor, public IInteractableInterface
+class HOPHOP_API APushableObject : public AInteractableObject
 {
 	GENERATED_BODY()
 	
@@ -31,26 +27,6 @@ public:
 protected:
 
 	virtual void BeginPlay() override;
-
-	UFUNCTION(BlueprintCallable)
-		void ShowInRangePlayerUI();
-
-	UFUNCTION()
-		void OnWidgetBoxOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	
-	UFUNCTION()
-		void OnWidgetBoxEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UPROPERTY(VisibleAnywhere, Category = Initialization)
-		UStaticMeshComponent* Mesh;
-	UPROPERTY(VisibleAnywhere, Category = Initialization)
-		UBoxComponent* Box;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Initialization)
-		UBoxComponent* WidgetCollision;
-	UPROPERTY(VisibleAnywhere, Category = Initialization)
-		UPromptComponent* PromptDisplay;
-	UPROPERTY(VisibleAnywhere, Category = Initialization)
-		class ARabbit* RabbitPlayer;
 
 private:
 

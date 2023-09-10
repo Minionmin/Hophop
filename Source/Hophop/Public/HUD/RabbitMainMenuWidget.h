@@ -16,6 +16,4 @@ class HOPHOP_API URabbitMainMenuWidget : public URabbitUserWidget
 
 public:
 
-	//UPROPERTY(meta = (BindWidget))
-		//class UTextBlock* LevelLabel;
 };

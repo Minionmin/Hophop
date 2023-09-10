@@ -2,13 +2,15 @@
 
 
 #include "Actors/Teleporter.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "HUD/PromptComponent.h"
 #include "NiagaraComponent.h"
 
 ATeleporter::ATeleporter()
 {
-	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Box->CanCharacterStepUpOn = ECB_No;
+	Box->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
 
 	Portal = CreateDefaultSubobject<UNiagaraComponent>(TEXT("Portal"));
 	Portal->SetupAttachment(GetRootComponent());
@@ -23,7 +25,6 @@ void ATeleporter::Tick(float DeltaTime)
 void ATeleporter::BeginPlay()
 {
 	Super::BeginPlay();
-	PromptDisplay->SetVisibility(false);
 	PromptDisplay->SetTargetLevelText(getTargetLevelName());
 	
 }

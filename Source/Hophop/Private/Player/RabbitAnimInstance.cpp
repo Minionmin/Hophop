@@ -13,7 +13,7 @@ void URabbitAnimInstance::NativeInitializeAnimation()
 	Rabbit = Cast<ARabbit>(TryGetPawnOwner());
 	if (Rabbit)
 	{
-		RabbitMovement = Rabbit->GetCharacterMovement();
+		RabbitMovementComponent = Rabbit->GetCharacterMovement();
 	}
 
 }
@@ -22,9 +22,9 @@ void URabbitAnimInstance::NativeUpdateAnimation(float DeltaTime)
 {
 	Super::NativeUpdateAnimation(DeltaTime);
 
-	if (RabbitMovement)
+	if (RabbitMovementComponent)
 	{
-		GroundSpeed = UKismetMathLibrary::VSizeXY(RabbitMovement->Velocity);
-		IsFalling = RabbitMovement->IsFalling();
+		GroundSpeed = UKismetMathLibrary::VSizeXY(RabbitMovementComponent->Velocity);
+		IsFalling = RabbitMovementComponent->IsFalling();
 	}
 }
