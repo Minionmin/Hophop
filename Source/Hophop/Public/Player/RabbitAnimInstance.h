@@ -19,12 +19,23 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaTime) override;
 	
-	UPROPERTY(BlueprintReadOnly, Category = Initialization)
+	// Anim Notify
+	UFUNCTION(BlueprintCallable)
+		void GetGroundSurfaceType(bool& OutHasHit, FVector& OutPlayerLocation, TEnumAsByte<EPhysicalSurface>& OutSurface);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Initialization")
 		class ARabbit* Rabbit;
-	UPROPERTY(BlueprintReadOnly, Category = Initialization)
+	UPROPERTY(BlueprintReadOnly, Category = "Initialization")
 		class UCharacterMovementComponent* RabbitMovementComponent;
-	UPROPERTY(BlueprintReadOnly, Category = State)
+	UPROPERTY(BlueprintReadOnly, Category = "State")
 		float GroundSpeed;
-	UPROPERTY(BlueprintReadOnly, Category = State)
+	UPROPERTY(BlueprintReadOnly, Category = "State")
 		bool IsFalling;
+	UPROPERTY(BlueprintReadOnly, Category = "State")
+		bool IsClimbing;
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+		float ClimbLeftAndRight;
+	UPROPERTY(BlueprintReadOnly, Category = "Movement")
+		float ClimbUpAndDown;
+
 };

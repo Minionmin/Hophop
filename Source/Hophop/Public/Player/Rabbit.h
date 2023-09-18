@@ -17,6 +17,7 @@ class UInputAction;
 class ACarrotProjectile;
 class URabbitUserWidget;
 class UCurveFloat;
+class UCurveVector;
 class UMotionWarpingComponent;
 
 UCLASS()
@@ -36,7 +37,7 @@ public:
 	void EnableUI();
 	UFUNCTION()
 	void DisableUI();
-
+	
 	bool ESCAlreadyPressed;
 	UPROPERTY(EditDefaultsOnly, Category = UI)
 		class UGuideUIComponent* GuideUIComponent;
@@ -94,7 +95,7 @@ private:
 	UFUNCTION()
 		void Climbing(FVector WorldDirection, float ScaleValue);
 	UFUNCTION()
-		void CalculateLedgeToMount(float TraceDistance);
+		void CalculateLedgeToMount(float TraceDistance, ECollisionChannel CollisionChannel);
 	UFUNCTION()
 		void StopClimbing();
 	UFUNCTION()
@@ -122,6 +123,7 @@ private:
 
 	FOnTimelineFloat TimelineProgress;
 	FTimeline CurveTimeline;
+
 	UPROPERTY(EditAnywhere, Category = "Timeline")
 		UCurveFloat* CurveFloat;
 	UPROPERTY(VisibleAnywhere, Category = "Timeline")
@@ -145,4 +147,19 @@ private:
 	// For avoiding magic number
 	float MaxRabbitFlySpeed = 200.f;
 	float BrakingDecelerationFlyingSpeed = 3000.f;
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float MotionWarpHeight = 200.f;
+	UPROPERTY(VisibleAnywhere, Category = "Movement")
+		float ClimbLeftAndRight;
+	UPROPERTY(VisibleAnywhere, Category = "Movement")
+		float ClimbUpAndDown;
+
+// Getter Setter
+public:
+
+	UFUNCTION()
+		float GetClimbLeftAndRightValue() { return ClimbLeftAndRight; }
+	UFUNCTION()
+		float GetClimbUpAndDownValue() { return ClimbUpAndDown; }
+
 };

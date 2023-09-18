@@ -22,7 +22,8 @@ void URabbitMainMenuButtonWidget::StartResumeText()
 
 void URabbitMainMenuButtonWidget::StartClicked()
 {
-	UGameplayStatics::OpenLevel(GetWorld(), FName("LevelSelector"));
+	FString TargetLevel = UEnum::GetDisplayValueAsText(RabbitLevel::IntroLevel).ToString();
+	UGameplayStatics::OpenLevel(GetWorld(), FName(*TargetLevel));
 	UGameplayStatics::GetPlayerController(GetWorld(), 0)->SetInputMode(FInputModeGameOnly());
 }
 

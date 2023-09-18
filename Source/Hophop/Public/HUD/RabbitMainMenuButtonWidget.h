@@ -6,6 +6,18 @@
 #include "HUD/RabbitUserWidget.h"
 #include "RabbitMainMenuButtonWidget.generated.h"
 
+UENUM(BlueprintType)
+enum class RabbitLevel : uint8
+{
+	MainMenu = 0 UMETA(DisplayName = "MainMenu"),
+	IntroLevel UMETA(DisplayName = "IntroLevel"),
+	Level1 UMETA(DisplayName = "Level1_1"),
+	Level1A UMETA(DisplayName = "Level1A"),
+	Level1B UMETA(DisplayName = "Level1B"),
+	Level1C UMETA(DisplayName = "Level1C"),
+	Level1D UMETA(DisplayName = "Level1D")
+};
+
 /**
  * 
  */

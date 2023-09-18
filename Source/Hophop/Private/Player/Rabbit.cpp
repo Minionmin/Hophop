@@ -23,7 +23,7 @@
 ARabbit::ARabbit()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 	// Player doesn't rotate along camera rotation
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationPitch = false;
@@ -140,7 +140,7 @@ void ARabbit::ChargeJump(const FInputActionValue& Value)
 void ARabbit::Jump()
 {
 	EMovementMode currentMovementMode = RabbitMovementComponent->MovementMode;
-	if (currentMovementMode != EMovementMode::MOVE_Flying)
+	if (currentMovementMode == EMovementMode::MOVE_Walking)
 	{
 		GetCharacterMovement()->JumpZVelocity = PresentJumpHeight;
 		Super::Jump();
@@ -171,10 +171,13 @@ void ARabbit::Move(const FInputActionValue& Value)
 	}
 	else if (currentMovementMode == EMovementMode::MOVE_Flying) // Climbing
 	{
+		// ClimbLeftAndRight,ClimbUpAndDown are the variable for Animation Blueprint
 		const FVector UpDirection = GetActorUpVector();
 		Climbing(UpDirection, MovementVector.X);
+		ClimbUpAndDown = MovementVector.X * MaxRabbitFlySpeed;
 		const FVector RightDirection = GetActorRightVector();
 		Climbing(RightDirection, MovementVector.Y);
+		ClimbLeftAndRight = MovementVector.Y * MaxRabbitFlySpeed;
 	}
 
 }
@@ -293,7 +296,7 @@ void ARabbit::Climb(const FInputActionValue& Value)
 	FVector StartingPoint = GetActorLocation();
 	FVector EndingPoint = GetActorForwardVector() * TraceDistance + GetActorLocation();
 
-	FHitResult HitResult = BeginLineTrace(ECollisionChannel::ECC_EngineTraceChannel1, StartingPoint, EndingPoint, FColor::Green);
+	FHitResult HitResult = BeginLineTrace(ECollisionChannel::ECC_GameTraceChannel4, StartingPoint, EndingPoint, FColor::Green);
 
 	if (HitResult.GetActor() != nullptr)
 	{
@@ -317,12 +320,8 @@ void ARabbit::Climb(const FInputActionValue& Value)
 		FLatentActionInfo LatentInfo;
 		LatentInfo.CallbackTarget = this;
 		UKismetSystemLibrary::MoveComponentTo(RootComponent, WallOffsetLocation, FaceRotation, false, false, 0.2f, true, EMoveComponentAction::Move, LatentInfo);
+		CalculateLedgeToMount(TraceDistance, ECollisionChannel::ECC_GameTraceChannel4);
 	}
-	else
-	{
-		UE_LOG(LogTemp, Log, TEXT("No Hit Object"));
-	}
-
 }
 
 void ARabbit::Climbing(FVector WorldDirection, float ScaleValue)
@@ -333,7 +332,7 @@ void ARabbit::Climbing(FVector WorldDirection, float ScaleValue)
 	FVector EndingPoint = GetActorForwardVector() * TraceDistance + GetActorLocation();
 
 	// Trace for currently climbing wall
-	FHitResult HitResult = BeginLineTrace(ECollisionChannel::ECC_EngineTraceChannel1, StartingPoint, EndingPoint, FColor::Green);
+	FHitResult HitResult = BeginLineTrace(ECollisionChannel::ECC_GameTraceChannel4, StartingPoint, EndingPoint, FColor::Green);
 
 	AddMovementInput(WorldDirection, ScaleValue);
 	FVector VectorToWall = HitResult.ImpactNormal * -1.f;
@@ -347,7 +346,7 @@ void ARabbit::Climbing(FVector WorldDirection, float ScaleValue)
 	if (HitResult.GetActor() != nullptr)
 	{
 		// Detecting ledge to mount
-		CalculateLedgeToMount(TraceDistance);
+		CalculateLedgeToMount(TraceDistance, ECollisionChannel::ECC_GameTraceChannel4);
 		// **Detecting ledge to mount
 	}
 	else
@@ -356,7 +355,7 @@ void ARabbit::Climbing(FVector WorldDirection, float ScaleValue)
 	}
 }
 
-void ARabbit::CalculateLedgeToMount(float TraceDistance)
+void ARabbit::CalculateLedgeToMount(float TraceDistance, ECollisionChannel CollisionChannel)
 {
 	FVector HeadStartingPoint = GetActorLocation() + FVector(0.f, 0.f, 100.f);
 	FVector HeadEndingPoint = GetActorForwardVector() * TraceDistance + HeadStartingPoint;
@@ -369,11 +368,12 @@ void ARabbit::CalculateLedgeToMount(float TraceDistance)
 		LedgeHitResult,
 		HeadStartingPoint,
 		HeadEndingPoint,
-		ECollisionChannel::ECC_EngineTraceChannel1,
+		CollisionChannel,
 		Params
 	);
 
 	// Debug line for Ledge
+	/*
 	UKismetSystemLibrary::DrawDebugLine(
 		this,
 		HeadStartingPoint,
@@ -382,18 +382,19 @@ void ARabbit::CalculateLedgeToMount(float TraceDistance)
 		5.0f,
 		1.f
 	);
+	*/
 
 	if (!bLedgeHasHit)
 	{
 		int maxIndex = 20;
-		int step = 3;
+		int step = 4;
 		float HeightToCheckFrom = 90.f;
 
 		for (int index = 0; index <= maxIndex; index++)
 		{
 			int stepLength = index * step;
 			FVector LedgeCheckStartLocation = (GetActorForwardVector() * stepLength) + (LedgeHitResult.TraceStart + FVector(0.f, 0.f, HeightToCheckFrom));
-			FVector LedgeCheckEndLocation = LedgeCheckStartLocation - FVector(0.f, 0.f, HeightToCheckFrom + 10);
+			FVector LedgeCheckEndLocation = LedgeCheckStartLocation - FVector(0.f, 0.f, HeightToCheckFrom + 60.f);
 
 			FHitResult LedgeTopHitResult;
 
@@ -401,39 +402,47 @@ void ARabbit::CalculateLedgeToMount(float TraceDistance)
 				LedgeTopHitResult,
 				LedgeCheckStartLocation,
 				LedgeCheckEndLocation,
-				ECollisionChannel::ECC_EngineTraceChannel1,
+				CollisionChannel,
 				Params
 			);
 
 			// Debug line for LedgeTop
+			/*
 			UKismetSystemLibrary::DrawDebugLine(
 				this,
 				LedgeCheckStartLocation,
 				LedgeCheckEndLocation,
 				FColor::Purple,
-				5.0f,
+				1.0f,
 				1.f
 			);
+			*/
 
 			if (bLedgeTopHasHit)
 			{
+				// Debug line for LedgeTop Hit
+				/*
 				UKismetSystemLibrary::DrawDebugSphere(
 					this,
 					LedgeTopHitResult.Location,
 					20.f,
 					12,
 					FColor::Purple,
-					5.f
+					1.f
 				);
+				*/
+
+				Boomstick->bDoCollisionTest = false;
+				GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 				FTimerHandle AnimationTimerHandler;
 
 				// 1st motion warping (Climbing ledge vertically)
-				FVector TopLedgeVerticalWarpingLocation = FVector(GetActorLocation().X, GetActorLocation().Y, LedgeTopHitResult.Location.Z);
+				FVector TopLedgeVerticalWarpingLocation = FVector(GetActorLocation().X, GetActorLocation().Y, LedgeTopHitResult.Location.Z + 50.f);
 				MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(FName("LedgeClimbUp"), TopLedgeVerticalWarpingLocation, GetActorRotation());
 
 				// 2nd motion warping (Climbing ledge horizontally)
-				FVector TopLedgeHorizontalWarpingLocation = FVector(LedgeTopHitResult.Location.X, LedgeTopHitResult.Location.Y, GetActorLocation().Z + 100.f);
+				FVector TopLedgeHorizontalWarpingLocation = FVector(LedgeTopHitResult.Location.X, LedgeTopHitResult.Location.Y, GetActorLocation().Z + MotionWarpHeight);
 				MotionWarpingComponent->AddOrUpdateWarpTargetFromLocationAndRotation(FName("LedgeClimbForward"), TopLedgeHorizontalWarpingLocation, GetActorRotation());
 
 				// Disable player input and enter animation
@@ -441,9 +450,8 @@ void ARabbit::CalculateLedgeToMount(float TraceDistance)
 				PlayAnimMontage(MountLedgeMontage);
 
 				// Stop climbing after animation finished
-				GetWorldTimerManager().SetTimer(AnimationTimerHandler, this, &ARabbit::StopClimbing, MountLedgeMontage->GetPlayLength(), false);
+				GetWorldTimerManager().SetTimer(AnimationTimerHandler, this, &ARabbit::StopClimbing, MountLedgeMontage->GetPlayLength() - 0.5f, false);
 
-				// break out of for loop (for checking ledge top)
 				break;
 			}
 		}
@@ -461,6 +469,8 @@ void ARabbit::StopClimbing()
 	if (isInAnimationMontage)
 	{
 		isInAnimationMontage = false;
+		Boomstick->bDoCollisionTest = true;
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	}
 }
 
@@ -478,14 +488,17 @@ FHitResult ARabbit::BeginLineTrace(ECollisionChannel TraceChannel, FVector Start
 		Params
 	);
 
+	// Debug line trace
+	/*
 	UKismetSystemLibrary::DrawDebugLine(
 		this,
 		StartingPoint,
 		EndingPoint,
 		DebugColor,
-		5.0f,
+		1.0f,
 		1.f
 	);
+	*/
 
 	return HitResult;
 }
